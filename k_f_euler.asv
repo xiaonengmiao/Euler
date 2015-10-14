@@ -1,0 +1,39 @@
+% Kinetic flux for euler equation
+% ul - 1x3 array, state on the left
+% ur - 1x3 array, state on the right
+% flux - 1x1x3 array, output flux
+% Author Luo Li, lluoac@ust.hk
+function [flux]=k_f_euler(ul,ur)
+gammer=1.4;
+pi=3.1415;
+flux=zeros(1,3);
+
+% left state
+rhol=ul(1);
+rhoul=ul(2);
+rhoEl=ul(3);
+ulx=rhoul/rhol;
+pl=(gammer-1.)*(rhoEl-0.5*rhoul*rhoul/rhol);
+laml=rhol/(2.*pl);
+u0l=0.5*erfc(-sqrt(laml)*ulx);
+u1l=ulx*u0l+0.5*exp(-laml*ulx*ulx)/sqrt(pi*laml);
+u2l=ulx*u1l+0.5/laml*u0l;
+u3l=ulx*u2l+1./laml*u1l;
+
+% right state
+rhor=ur(1);
+rhour=ur(2);
+rhoEr=ur(3);
+urx=rhour/rhor;
+pr=(gammer-1.)*(rhoEr-0.5*rhour*rhour/rhor);
+lamr=rhor/(2.*pr);
+u0r=0.5*erfc(sqrt(lamr)*urx);
+u1r=urx*u0r-0.5*exp(-lamr*urx*urx)/sqrt(pi*lamr);
+u2r=urx*u1r+0.5/lamr*u0r;
+u3r=urx*u2r+1./lamr*u1r;
+
+% flux
+flux(1,1)=rhol*u1l*1.*1.+rhor*u1r*1.*1.;
+flux(1,2)=rhol*u2l*1.*1.+rhor*u2r*1.*1.;
+flux(1,3)=0.5*rhol*(u3l*1.*1.+u1l*1./(2*laml)*1.+u1l*1.*1./(2*laml))+0.5*rhor*(u3r*1.*1.+u1r*1./(2*lamr)*1.+u1r*1.*1./(2*lamr));
+
